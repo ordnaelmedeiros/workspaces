@@ -27,6 +27,19 @@ precmd() {
     if [ $branchName ]; then
         spaces=$(expr ${#branchName} + $spaces + 4)
     fi
+
+    libs=""
+    foreach line ($(asdf current | sed -e 's/  */|/g'))
+        array=( $(echo $line | tr '|' "\n") );
+        # echo "${array[1]} ${array[2]}"
+        libs="$libs|${array[1]} ${array[2]}"
+    end
+
+    if [ $libs ]; then
+        libs="${libs:1}"
+        spaces=$(expr ${#libs} + $spaces + 2)
+    fi
+
     draw_gray "┌("
     
     draw_cyan "$folder"
@@ -35,12 +48,16 @@ precmd() {
         draw_green "$branchName"
     fi
     draw_gray ")"
-    for ((j=0; j<($COLUMNS-$spaces); j+=1))
-    do
+
+    line_l=$(($COLUMNS-$spaces))
+    for ((j=0; j<$line_l; j+=1)); do
         draw_gray "─"
     done
+    if [ $libs ]; then
+        draw_gray "($libs)"
+    fi
     draw_gray "┐"
-    printf " "
+    printf "\n"
 }
 
 PS1=$'\e[0;90m└ \e[0m'
